@@ -1,6 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router';
-import JsonTable from '../src/JsonTable';
+// import JsonTable from '../src/JsonTable';
+import './jsonToHtml.scss';
+
 
 class App extends React.Component {
   render() {

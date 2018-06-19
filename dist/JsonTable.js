@@ -45,7 +45,7 @@ function (_React$Component) {
   _createClass(JsonTable, [{
     key: "render",
     value: function render() {
-      var htmlTable = _JsonToHtml.default.getTable(this.props.json, this.props.transformer);
+      var htmlTable = _JsonToHtml.default.getTable(this.props.json, this.props.transformer, this.props.arrayRenderStyle);
 
       return _react.default.createElement("div", {
         dangerouslySetInnerHTML: {
@@ -60,7 +60,8 @@ function (_React$Component) {
 
 JsonTable.propTypes = {
   json: _propTypes.default.any,
-  transformer: _propTypes.default.func
+  transformer: _propTypes.default.func,
+  arrayRenderStyle: _propTypes.default.string
 };
 var _default = JsonTable;
 exports.default = _default;
