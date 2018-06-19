@@ -37,7 +37,7 @@ var JsonToHtml = function () {
 
 
   var getSpacer = function getSpacer() {
-    return '<tr style="height:2px"></tr>';
+    return ''; // return '<tr style="height:2px"></tr>';
   };
 
   var processArray = function processArray(arr, replacer) {
@@ -128,13 +128,13 @@ var JsonToHtml = function () {
 
     for (var k in jsonObj) {
       // Reset the indent if next element is root
-      if (typeof jsonObjOrig[k] !== 'undefined') {
-        level = 0;
-        rootClass = 'jsonTable__element--root';
-      } else {
-        rootClass = 'jsonTable__element--sub';
-      }
-
+      // if (typeof jsonObjOrig[k] !== 'undefined') {
+      //   level = 0;
+      //   rootClass = 'jsonTable__element--root';
+      // } else {
+      //   rootClass = 'jsonTable__element--sub';
+      // }
+      rootClass = 'jsonTable__element--sub';
       componentLevel = subLevel;
 
       if (jsonObj.hasOwnProperty(k)) {
@@ -144,7 +144,9 @@ var JsonToHtml = function () {
           level = componentLevel;
         }
 
-        if (_typeof(v) === 'object') {
+        console.log('renderVal ', level, k, v);
+
+        if (_typeof(v) === 'object' && v !== null) {
           html += '<tr class="jsonTable__row"><td class="' + rootClass + '" colspan="3">' + getIndent(level) + k + suffix + '</td></tr>';
           html += getSpacer();
           level += 1;
@@ -156,7 +158,7 @@ var JsonToHtml = function () {
             renderVal = replacer(k, v);
           }
 
-          html += '<tr class="jsonTable__row"><td class="' + rootClass + '">' + getIndent(level) + k + suffix + '</td><td class="' + style + '" colspan="2">' + renderVal + '</td></tr>';
+          html += '<tr class="jsonTable__row"><td class="' + rootClass + '">' + getIndent(level) + k + suffix + '</td><td class="' + style + '" colspan="2">' + (renderVal === null ? '' : renderVal) + '</td></tr>';
           html += getSpacer();
         } //vertical array
 
@@ -196,7 +198,7 @@ var JsonToHtml = function () {
           }
         }
 
-        if (_typeof(v) === 'object' && !(v instanceof Array)) {
+        if (_typeof(v) === 'object' && !(v instanceof Array) && !(v == null)) {
           walkTheDog(v, replacer);
           level = subLevel - 1; // Outdent back
         }
