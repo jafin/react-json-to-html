@@ -1,0 +1,42 @@
+.jsonTable {
+    border-spacing: 1px;
+    border-radius: 5px;    
+    border-collapse:separate;
+}
+
+.jsonTable__row {
+    height:25;
+}
+
+.jsonTable__jsonTd {
+    padding:5px;
+    border-spacing: 2px;
+    border-radius: 5px;
+}
+
+.jsonTable__element--root {
+    border-spacing: 2px;
+    background-color: #BBBBBB;
+    font-weight: bold;
+    font-family: 'Arial';
+    border-radius: 5px;    
+}
+
+.jsonTable__element--sub {
+    border-spacing: 2px;
+    background-color: #dddddd;
+    font-weight: bold;
+    font-family: 'Arial';
+    border-radius: 5px;
+}
+
+.jsonTable__indent {
+    width:30px;
+}
+
+.jsonTable__dataCell {
+    border-spacing: 2px;
+    background-color: #f1f1f1;
+    font-family: 'Arial';
+    border-radius: 5px;
+}

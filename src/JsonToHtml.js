@@ -1,27 +1,25 @@
-import Css from './Css';
-
 var JsonToHtml = (function() {
   let html = '';
   let level = 0;
   let rootClass = '';
   const suffix = '&nbsp;&nbsp;';
-  let jsonObjOrig; 
+  let jsonObjOrig;
   let subLevel = 0;
   let componentLevel = 0;
 
-  const getTable = function(jsonObj, replacer) {
-    html = '<table cellspacing="1" style="border-spacing:2px">';
+  const getTable = function(jsonObj, replacer, arrayRenderStyle) {
+    html = '<table class="jsonTable">';
     jsonObjOrig = jsonObj;
     level = 0;
-    walkTheDog(jsonObj, replacer);
+    walkTheDog(jsonObj, replacer,arrayRenderStyle);
     html += '</table>';
     return html;
   };
 
   const getIndent = function(level) {
-    let indent = '&nbsp;&nbsp;'; 
+    let indent = '&nbsp;&nbsp;';
 
-    for (var i=0; i<level; i++) {
+    for (var i = 0; i < level; i++) {
       indent += '&nbsp;&nbsp;&nbsp;';
     }
 
@@ -33,22 +31,7 @@ var JsonToHtml = (function() {
     return '<tr style="height:2px"></tr>';
   };
 
-  // Get the Css obj from Css.js, and return a semicolon separated list of styles
-  const getStyleAttributes = function(className) {
-    const cssObj = Css[className];
-    const keys = Object.keys(cssObj);
-    let attributes = '';
-
-    for(let i=0; i<keys.length; i++) {
-      const key = keys[i];
-      const cssAttr = key.replace(/([A-Z])/g, '-$1').toLowerCase(); 
-      attributes += cssAttr + ':' + cssObj[key] + ';';
-    }
-
-    return attributes;
-  };
-
-  var processArray = function(arr) {
+  var processArray = function(arr, replacer) {
     var distKeys = [];
     var html = '';
 
@@ -60,28 +43,52 @@ var JsonToHtml = (function() {
     // TODO: Handle unstructured objects in array. Assumption, for now, is that
     // all objects in array will have same structure.
     if (typeof arr[0] === 'object') {
-      // Render the props if only a single object in the array 
+      // Render the props if only a single object in the array
       if (arr.length === 1) {
         for (var k in arr[0]) {
           var value = '';
 
-          if (arr[0][k]) {
-            value = arr[0][k].toString();
+          //console.log(arr[0][k], typeof arr[0][k] === 'object');
+
+          if (typeof arr[0][k] === 'object') {
+            value = getTable(arr[0][k], replacer);
+          } else {
+            if (arr[0][k]) {
+              value = arr[0][k].toString();
+            }
+
+            if (typeof replacer === 'function') {
+              value = replacer(arr[0][k], value);
+            }
           }
 
-          html += '<tr style="height:25px">';
-          html += '  <td style="' + getStyleAttributes('subElement') + '">' + getIndent(level) + k + suffix + '</td>';
-          html += '  <td style="' + getStyleAttributes('dataCell') + '">' + getIndent(level) + value + suffix + '</td>';
+          html += '<tr class="jsonTable__row">';
+          html +=
+            '<td class="jsonTable__element--sub" name="foo">' +
+            getIndent(level) +
+            k +
+            suffix +
+            '</td>';
+          html +=
+            '<td class="jsonTable__dataCell">' +
+            getIndent(level) +
+            value +
+            suffix +
+            '</td>';
           html += '</tr>';
           html += getSpacer();
         }
-      }
-      else {
-        html = '<tr style="height:25px">';
+      } else {
+        html = '<tr class="jsonTable__row">';
 
         for (var j in arr[0]) {
           distKeys.push(j);
-          html += '<td style="' + getStyleAttributes('subElement') + '">' + getIndent(level) + j + suffix + '</td>';
+          html +=
+            '<td class="jsonTable__element--sub" name="bar">' +
+            getIndent(level) +
+            j +
+            suffix +
+            '</td>';
         }
 
         html += '</tr>';
@@ -89,10 +96,19 @@ var JsonToHtml = (function() {
 
         // Render a row for each obj, displaying the value for each distinct key
         for (var l in arr) {
-          html += '<tr style="height:25px">';
+          html += '<tr class="jsonTable__row">';
 
-          for (var i=0; i<distKeys.length; i++) {
-            html += '<td style="' + getStyleAttributes('dataCell') + '">' + getIndent(level) + arr[l][distKeys[i]] + suffix + '</td>';
+          for (var i = 0; i < distKeys.length; i++) {
+            let renderVal = arr[l][distKeys[i]];
+            if (typeof replacer === 'function') {
+              renderVal = replacer(distKeys[i], renderVal);
+            }
+            html +=
+              '<td  class="jsonTable__dataCell">' +
+              getIndent(level) +
+              renderVal +
+              suffix +
+              '</td>';
           }
           html += '</tr>';
           html += getSpacer();
@@ -103,17 +119,20 @@ var JsonToHtml = (function() {
     // Render a <tr> and <td> for each string in an array
     if (typeof arr[0] === 'string') {
       for (var m in arr) {
-        html += '<tr style="height:25px">';
-        html += '  <td style="' + getStyleAttributes('dataCell') + '" colspan="2">' + getIndent(level) + arr[m] + suffix + '</td>';
+        html += '<tr class="jsonTable__row">';
+        html +=
+          '  <td class="jsonTable__dataCell" colspan="2">' +
+          getIndent(level) +
+          arr[m] +
+          suffix +
+          '</td>';
         html += '</tr>';
       }
     }
     return html;
   };
 
-
-
-  var walkTheDog = function(jsonObj, replacer) {
+  var walkTheDog = function(jsonObj, replacer,arrayRenderStyle) {
     var hasArray = false;
 
     if (typeof jsonObj === 'string') {
@@ -126,56 +145,80 @@ var JsonToHtml = (function() {
       // Reset the indent if next element is root
       if (typeof jsonObjOrig[k] !== 'undefined') {
         level = 0;
-        rootClass = getStyleAttributes('rootElement');
+        rootClass = 'jsonTable__element--root';
+      } else {
+        rootClass = 'jsonTable__element--sub';
       }
-      else {
-        rootClass = getStyleAttributes('subElement');
-      }
-      
+
       componentLevel = subLevel;
 
       if (jsonObj.hasOwnProperty(k)) {
         var v = jsonObj[k];
-        
+
         if (hasArray) {
           level = componentLevel;
         }
 
         if (typeof v === 'object') {
-          // colspan += level;  //unused colspan??
-          html += '<tr style="height:25px"><td style="' + rootClass+ '" colspan="3">' + getIndent(level) + k + suffix + '</td></tr>';
+          html +=
+            '<tr class="jsonTable__row"><td class="' +
+            rootClass +
+            '" colspan="3">' +
+            getIndent(level) +
+            k +
+            suffix +
+            '</td></tr>';
           html += getSpacer();
           level += 1;
-        }
-        else {
-          var style = getStyleAttributes('jsonTd') + getStyleAttributes('dataCell');
-          
-          var renderVal = v;
+        } else {
+          const style = 'jsonTable__jsonTd jsonTable__dataCell';
+          let renderVal = v;
           if (typeof replacer === 'function') {
-            renderVal = replacer(k,v);
+            renderVal = replacer(k, v);
           }
-          
-          html += '<tr style="height:25px"><td style="' + rootClass + '">' + getIndent(level) + k + suffix + '</td><td style="' + style + '" colspan="2">' + renderVal + '</td></tr>';
+
+          html +=
+            '<tr class="jsonTable__row"><td class="' +
+            rootClass +
+            '">' +
+            getIndent(level) +
+            k +
+            suffix +
+            '</td><td class="' +
+            style +
+            '" colspan="2">' +
+            renderVal +
+            '</td></tr>';
           html += getSpacer();
         }
-       
+
+        //vertical array
         if (v instanceof Array) {
-          html += processArray(v);
-          hasArray = true;
+          if (arrayRenderStyle === 'vertical') {
+            for (var val of v) {
+              html += '<tr class="jsonTable__row"><td colspan="2" class="jsonTable__columnSpacer">&nbsp;</td></tr>';
+              walkTheDog(val, replacer);
+            }
+          } else {
+            // horizontal array
+            if (v instanceof Array) {
+              html += processArray(v, replacer);
+              hasArray = true;
+            }
+          }
         }
 
         if (typeof v === 'object' && !(v instanceof Array)) {
           walkTheDog(v, replacer);
-          level = subLevel - 1; // Outdent back 
+          level = subLevel - 1; // Outdent back
         }
       }
-    } 
+    }
   };
 
   return {
     getTable: getTable
   };
-
 })();
 
 export default JsonToHtml;
