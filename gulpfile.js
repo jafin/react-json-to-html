@@ -26,6 +26,10 @@ gulp.task('build', ['clean-build', 'clean-demo'], shell.task([
   'webpack --config webpack.config.build-demo.js'
 ]));
 
+gulp.task('demoserve', shell.task([
+  `webpack-serve ./webpack.config.demo.js --port ${listenPort}`
+]));
+
 gulp.task('demo', function() {
   new WebpackDevServer(webpack(demoConfig), {
     publicPath: '/',
@@ -46,7 +50,7 @@ gulp.task('demo', function() {
     historyApiFallback: true
   }).listen(listenPort, 'localhost', function(err, result) {
     if (err) {
-      console.log(err);
+      console.log(err, result);
     }
     console.log('Listening at localhost:'+ listenPort);
   });

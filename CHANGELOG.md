@@ -16,3 +16,13 @@
 ## Bug fix
 * Added proper outdenting for key value pairs in nested JSON objects
 
+
+<a name="v0.0.4"><a/>
+V v1.0.4 (2018/06/18)
+
+## Features
+* Added transform prop, allow passing to a func to transform node outputs.
+
+## Tasks
+* Build pipeline updated to webpack 4
+
