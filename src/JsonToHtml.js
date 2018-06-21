@@ -162,8 +162,6 @@ var JsonToHtml = (function() {
           level = componentLevel;
         }
 
-        console.log('renderVal ',level, k,v);
-
         if (typeof v === 'object' && v !== null) {
           html +=
             '<tr class="jsonTable__row"><td class="' +

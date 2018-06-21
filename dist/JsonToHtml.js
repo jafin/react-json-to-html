@@ -144,8 +144,6 @@ var JsonToHtml = function () {
           level = componentLevel;
         }
 
-        console.log('renderVal ', level, k, v);
-
         if (_typeof(v) === 'object' && v !== null) {
           html += '<tr class="jsonTable__row"><td class="' + rootClass + '" colspan="3">' + getIndent(level) + k + suffix + '</td></tr>';
           html += getSpacer();
